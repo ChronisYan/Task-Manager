@@ -22,6 +22,11 @@ const userSchema = new Schema({
     unique: true,
     minlength: 3,
     maxlength: 15,
+    validate(value) {
+      if (value.includes(" ")) {
+        throw new Error("Username can't include spaces");
+      }
+    },
   },
   email: {
     type: String,
@@ -40,8 +45,8 @@ const userSchema = new Schema({
     required: true,
     minlength: 7,
   },
-  timestamps: {
-    createdAt: "created_at",
-    updatedAt: "updated_at",
-  },
 });
+
+const User = mongoose.model("User", userSchema);
+
+module.exports = User;
