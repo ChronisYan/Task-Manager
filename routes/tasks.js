@@ -35,7 +35,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // POST create new task
-router.post("/new", async (req, res) => {
+router.post("/", async (req, res) => {
   const new_task = new Task(req.body);
 
   try {
@@ -52,7 +52,7 @@ router.post("/new", async (req, res) => {
 const validUpdateFields = ["description", "completed"];
 
 // PATCH update existing task
-router.patch("/:id/edit", validUpdate(validUpdateFields), async (req, res) => {
+router.patch("/:id", validUpdate(validUpdateFields), async (req, res) => {
   try {
     const task = await Task.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -74,5 +74,21 @@ router.patch("/:id/edit", validUpdate(validUpdateFields), async (req, res) => {
 });
 
 //DELETE delete user by id
+router.delete("/:id", async (req, res) => {
+  try {
+    const task = await Task.findByIdAndDelete(req.params.id);
+
+    if (!task) {
+      return res.status(404).send({
+        error: "Task was not found",
+      });
+    }
+    res.send(task);
+  } catch (err) {
+    res.status(500).send({
+      error: err,
+    });
+  }
+});
 
 module.exports = router;

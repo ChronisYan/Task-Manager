@@ -35,7 +35,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // POST create new user
-router.post("/new", async (req, res) => {
+router.post("/", async (req, res) => {
   const new_user = new User(req.body);
 
   try {
@@ -57,7 +57,7 @@ const validUpdateFields = [
   "password",
 ];
 // PATCH update existing user
-router.patch("/:id/edit", validUpdate(validUpdateFields), async (req, res) => {
+router.patch("/:id", validUpdate(validUpdateFields), async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(req.params.id, req.body, {
       new: true, // return the updated resource
@@ -79,5 +79,22 @@ router.patch("/:id/edit", validUpdate(validUpdateFields), async (req, res) => {
 });
 
 //DELETE delete user by id
+router.delete("/:id", async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+
+    if (!user) {
+      return res.status(404).send({
+        error: "User was not found",
+      });
+    }
+
+    res.send(user);
+  } catch (err) {
+    res.status(500).send({
+      error: err,
+    });
+  }
+});
 
 module.exports = router;
