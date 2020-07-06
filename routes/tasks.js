@@ -8,7 +8,26 @@ router.get("/", async (req, res, next) => {
     const tasks = await Task.find({});
     res.send(tasks);
   } catch (err) {
-    res.status(400).send({
+    res.status(500).send({
+      error: err,
+    });
+  }
+});
+
+// GET specific task by ID
+router.get("/:id", async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.id);
+
+    if (!task) {
+      return res.status(404).send({
+        error: "Task was not found",
+      });
+    }
+
+    res.send(task);
+  } catch (err) {
+    res.status(500).send({
       error: err,
     });
   }

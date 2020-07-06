@@ -3,12 +3,31 @@ const router = express.Router();
 const User = require("../models/users");
 
 // GET all users
-router.get("/", async (req, res, next) => {
+router.get("/", async (req, res) => {
   try {
     const users = await User.find({});
     res.send(users);
   } catch (err) {
-    res.status(400).send({
+    res.status(500).send({
+      error: err,
+    });
+  }
+});
+
+// GET specific user by ID
+router.get("/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).send({
+        error: "User was not found",
+      });
+    }
+
+    res.send(user);
+  } catch (err) {
+    res.status(500).send({
       error: err,
     });
   }
