@@ -38,6 +38,7 @@ const userSchema = new Schema({
   password: {
     type: String,
     required: true,
+    minlength: 7,
   },
   timestamps: {
     createdAt: "created_at",
