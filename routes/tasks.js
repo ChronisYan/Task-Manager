@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Task = require("../models/tasks");
+const validUpdate = require("../middleware/validUpdate");
 
 // GET all tasks
 router.get("/", async (req, res, next) => {
@@ -35,7 +36,7 @@ router.get("/:id", async (req, res) => {
 
 // POST create new task
 router.post("/new", async (req, res) => {
-  const new_task = await new Task(req.body);
+  const new_task = new Task(req.body);
 
   try {
     await new_task.save();
@@ -46,5 +47,32 @@ router.post("/new", async (req, res) => {
     });
   }
 });
+
+// Fields allowed to be modified
+const validUpdateFields = ["description", "completed"];
+
+// PATCH update existing task
+router.patch("/:id/edit", validUpdate(validUpdateFields), async (req, res) => {
+  try {
+    const task = await Task.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!task) {
+      res.status(404).send({
+        error: "Task was not found",
+      });
+    }
+
+    res.send(task);
+  } catch (err) {
+    res.status(400).send({
+      error: err,
+    });
+  }
+});
+
+//DELETE delete user by id
 
 module.exports = router;

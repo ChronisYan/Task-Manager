@@ -21,7 +21,7 @@ const userSchema = new Schema({
     trim: true,
     unique: true,
     minlength: 3,
-    maxlength: 15,
+    maxlength: 35,
     validate(value) {
       if (value.includes(" ")) {
         throw new Error("Username can't include spaces");
