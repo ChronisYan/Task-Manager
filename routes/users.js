@@ -100,4 +100,21 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// LOGIN USER
+router.post("/login", async (req, res) => {
+  try {
+    const user = await User.findAndAuthenticate(
+      req.body.identification,
+      req.body.password
+    );
+
+    // DO STUFF .....
+    res.send(user);
+  } catch (err) {
+    res.status(400).send({
+      error: err,
+    });
+  }
+});
+
 module.exports = router;

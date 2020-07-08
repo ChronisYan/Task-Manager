@@ -27,6 +27,9 @@ const userSchema = new Schema({
       if (value.includes(" ")) {
         throw new Error("Username can't include spaces");
       }
+      if (value.includes("@")) {
+        throw new Error("Username can't include the '@' character");
+      }
     },
   },
   email: {
@@ -47,6 +50,28 @@ const userSchema = new Schema({
     minlength: 7,
   },
 });
+
+// Find and authenticate user by email/usernam and password
+userSchema.statics.findAndAuthenticate = async (identification, password) => {
+  // Find user by email or username
+  let user;
+  if (validator.isEmail(identification)) {
+    user = await User.findOne({ email: identification });
+  } else {
+    user = await User.findOne({ username: identification });
+  }
+  // throw error if user doesn't exist
+  if (!user) {
+    throw new Error("Unable to login");
+  }
+  // Compare passwords, throw error if it's invalid
+  const isValid = await bcrypt.compare(password, user.password);
+  if (!isValid) {
+    throw new Error("Unable to login");
+  }
+  // return user if password matches
+  return user;
+};
 
 //password hashing middleware run before saving
 userSchema.pre("save", async function (next) {
