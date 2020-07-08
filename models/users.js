@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 const Schema = mongoose.Schema;
 
@@ -48,7 +50,25 @@ const userSchema = new Schema({
     required: true,
     minlength: 7,
   },
+  tokens: [
+    {
+      token: {
+        type: String,
+        required: true,
+      },
+    },
+  ],
 });
+
+// Hide private data from response
+userSchema.methods.toJSON = function () {
+  const userObj = this.toObject();
+
+  delete userObj.password;
+  delete userObj.tokens;
+
+  return userObj;
+};
 
 // Find and authenticate user by email/usernam and password
 userSchema.statics.identifyUser = async (identification) => {
@@ -74,6 +94,17 @@ userSchema.statics.findAndAuthenticate = async (identification, password) => {
   }
   // return user if password matches
   return user;
+};
+
+// Generate Auth Token method of a User instance
+userSchema.methods.generateAuthToken = async function () {
+  const user = this;
+  const key = process.env.JWT_KEY;
+  const token = jwt.sign({ _id: user._id.toString() }, key);
+
+  user.tokens = user.tokens.concat({ token });
+  await user.save();
+  return token;
 };
 
 //password hashing middleware run before saving

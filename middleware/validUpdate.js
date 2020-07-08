@@ -1,6 +1,3 @@
-const mongoose = require("mongoose");
-const express = require("express");
-
 const validUpdate = (validFields) => {
   return (req, res, next) => {
     // Allow users to update only specific things
