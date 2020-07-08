@@ -59,16 +59,19 @@ const validUpdateFields = [
 // PATCH update existing user
 router.patch("/:id", validUpdate(validUpdateFields), async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, {
-      new: true, // return the updated resource
-      runValidators: true, //re-run all existing validations
-    });
+    // The model.findByIdAndUpdate method bypasses mongoose middleware
+
+    // Find user by id
+    const user = await User.findById(req.params.id);
 
     if (!user) {
       return res.status(404).send({
         error: "User was not found",
       });
     }
+    // Manually update user and save
+    Object.keys(req.body).forEach((field) => (user[field] = req.body[field]));
+    await user.save();
 
     res.send(user);
   } catch (err) {

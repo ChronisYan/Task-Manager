@@ -26,6 +26,9 @@ router.get("/:id", async (req, res) => {
       });
     }
 
+    Object.keys(req.body).forEach((field) => (task[field] = req.body[field]));
+    await task.save();
+
     res.send(task);
   } catch (err) {
     res.status(500).send({

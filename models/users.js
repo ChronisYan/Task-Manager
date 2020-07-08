@@ -20,6 +20,7 @@ const userSchema = new Schema({
     required: true,
     trim: true,
     unique: true,
+    lowercase: true,
     minlength: 3,
     maxlength: 35,
     validate(value) {
@@ -45,6 +46,16 @@ const userSchema = new Schema({
     required: true,
     minlength: 7,
   },
+});
+
+//password hashing middleware run before saving
+userSchema.pre("save", async function (next) {
+  const user = this;
+  // run only when the password has been modified
+  if (user.isModified("password")) {
+    user.password = await bcrypt.hash(user.password, 8);
+  }
+  next();
 });
 
 const User = mongoose.model("User", userSchema);
