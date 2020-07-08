@@ -20,7 +20,6 @@ const userSchema = new Schema({
     required: true,
     trim: true,
     unique: true,
-    lowercase: true,
     minlength: 3,
     maxlength: 35,
     validate(value) {
@@ -52,14 +51,18 @@ const userSchema = new Schema({
 });
 
 // Find and authenticate user by email/usernam and password
+userSchema.statics.identifyUser = async (identification) => {
+  if (validator.isEmail(identification)) {
+    const user = await User.findOne({ email: identification });
+    return user;
+  }
+
+  const user = await User.findOne({ username: identification });
+  return user;
+};
 userSchema.statics.findAndAuthenticate = async (identification, password) => {
   // Find user by email or username
-  let user;
-  if (validator.isEmail(identification)) {
-    user = await User.findOne({ email: identification });
-  } else {
-    user = await User.findOne({ username: identification });
-  }
+  const user = await User.identifyUser(identification);
   // throw error if user doesn't exist
   if (!user) {
     throw new Error("Unable to login");

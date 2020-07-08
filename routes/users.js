@@ -107,12 +107,11 @@ router.post("/login", async (req, res) => {
       req.body.identification,
       req.body.password
     );
-
     // DO STUFF .....
     res.send(user);
   } catch (err) {
     res.status(400).send({
-      error: err,
+      error: "Unable to login",
     });
   }
 });
