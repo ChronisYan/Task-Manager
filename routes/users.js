@@ -33,42 +33,31 @@ const validUpdateFields = [
   "password",
 ];
 // PATCH update logged in user
-router.patch("/:id", validUpdate(validUpdateFields), async (req, res) => {
-  try {
-    // The model.findByIdAndUpdate method bypasses mongoose middleware
+router.patch(
+  "/me",
+  [auth, validUpdate(validUpdateFields)],
+  async (req, res) => {
+    try {
+      // Manually update user and save
+      Object.keys(req.body).forEach(
+        (field) => (req.user[field] = req.body[field])
+      );
 
-    // Find user by id
-    const user = await User.findById(req.params.id);
-
-    if (!user) {
-      return res.status(404).send({
-        error: "User was not found",
+      await req.user.save();
+      res.send(req.user);
+    } catch (err) {
+      res.status(400).send({
+        error: err,
       });
     }
-    // Manually update user and save
-    Object.keys(req.body).forEach((field) => (user[field] = req.body[field]));
-    await user.save();
-
-    res.send(user);
-  } catch (err) {
-    res.status(400).send({
-      error: err,
-    });
   }
-});
+);
 
 //DELETE delete logged in user
-router.delete("/:id", async (req, res) => {
+router.delete("/me", auth, async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
-
-    if (!user) {
-      return res.status(404).send({
-        error: "User was not found",
-      });
-    }
-
-    res.send(user);
+    await req.user.remove();
+    res.send(req.user);
   } catch (err) {
     res.status(500).send({
       error: err,
