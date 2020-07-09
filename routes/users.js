@@ -4,8 +4,17 @@ const User = require("../models/users");
 const validUpdate = require("../middleware/validUpdate");
 const auth = require("../middleware/auth");
 
+// Fields allowed to be modified
+const validUpdateFields = [
+  "first_name",
+  "last_name",
+  "username",
+  "email",
+  "password",
+];
+
 // POST create new user
-router.post("/", async (req, res) => {
+router.post("/", validUpdate(validUpdateFields), async (req, res) => {
   const user = new User(req.body);
 
   try {
@@ -24,14 +33,6 @@ router.get("/me", auth, (req, res) => {
   res.send(req.user);
 });
 
-// Fields allowed to be modified
-const validUpdateFields = [
-  "first_name",
-  "last_name",
-  "username",
-  "email",
-  "password",
-];
 // PATCH update logged in user
 router.patch(
   "/me",

@@ -8,7 +8,7 @@ const validUpdate = (validFields) => {
 
     if (!isValidUpdate) {
       return res.status(400).send({
-        error: "Invalid Update",
+        error: "An invalid field was submitted",
       });
     }
 

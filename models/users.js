@@ -59,6 +59,12 @@ const userSchema = new Schema({
     },
   ],
 });
+// virtual taks-user relationship
+userSchema.virtual("tasks", {
+  ref: "Task",
+  localField: "_id",
+  foreignField: "owner",
+});
 
 // Hide private data from response
 userSchema.methods.toJSON = function () {
