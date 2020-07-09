@@ -7,64 +7,77 @@ require("dotenv").config();
 
 const Schema = mongoose.Schema;
 
-const userSchema = new Schema({
-  first_name: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  last_name: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  username: {
-    type: String,
-    required: true,
-    trim: true,
-    unique: true,
-    minlength: 3,
-    maxlength: 35,
-    validate(value) {
-      if (value.includes(" ")) {
-        throw new Error("Username can't include spaces");
-      }
-      if (value.includes("@")) {
-        throw new Error("Username can't include the '@' character");
-      }
+const userSchema = new Schema(
+  {
+    first_name: {
+      type: String,
+      required: true,
+      trim: true,
     },
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-    lowercase: true,
-    validate(value) {
-      if (!validator.isEmail(value)) {
-        throw new Error("Invalid Email");
-      }
+    last_name: {
+      type: String,
+      required: true,
+      trim: true,
     },
-  },
-  password: {
-    type: String,
-    required: true,
-    minlength: 7,
-  },
-  tokens: [
-    {
-      token: {
-        type: String,
-        required: true,
+    username: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+      minlength: 3,
+      maxlength: 35,
+      validate(value) {
+        if (value.includes(" ")) {
+          throw new Error("Username can't include spaces");
+        }
+        if (value.includes("@")) {
+          throw new Error("Username can't include the '@' character");
+        }
       },
     },
-  ],
-});
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+      validate(value) {
+        if (!validator.isEmail(value)) {
+          throw new Error("Invalid Email");
+        }
+      },
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 7,
+    },
+    tokens: [
+      {
+        token: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
+  },
+  {
+    timestamps: true,
+  }
+);
+
 // virtual taks-user relationship
 userSchema.virtual("tasks", {
   ref: "Task",
   localField: "_id",
   foreignField: "owner",
+});
+
+userSchema.virtual("nTasks", {
+  ref: "Task",
+  localField: "_id",
+  foreignField: "owner",
+  count: true,
 });
 
 // Hide private data from response

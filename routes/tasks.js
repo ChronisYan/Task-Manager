@@ -27,9 +27,50 @@ router.post("/", [auth, validUpdate(validUpdateFields)], async (req, res) => {
 
 // GET all user's tasks
 router.get("/", auth, async (req, res, next) => {
+  const match = {};
+  let path = "tasks";
+  let order = 1;
+  let sortBy = "createdAt";
+  const validOrderBy = { description: 1, completed: 1, updatedAt: 1 };
+
+  // FILTER: completed
+  if (req.query.completed) {
+    match.completed = req.query.completed === "true";
+  }
+  // SEND: only number of tasks
+  if (req.query.count === "true") {
+    path = "nTasks";
+  }
+  // OPTION: descending order (default === ascending)
+  if (req.query.desc === "true" || req.query.asc === "false") {
+    order = -1;
+  }
+  // OPTION: field to sort by
+  if (req.query.sortBy in validOrderBy) {
+    sortBy = req.query.sortBy;
+  }
+
   try {
-    await req.user.populate("tasks").execPopulate();
-    res.send(req.user.tasks);
+    await req.user
+      .populate({
+        path,
+        match,
+        options: {
+          limit: parseInt(req.query.limit),
+          skip: parseInt(req.query.skip),
+          sort: {
+            [sortBy]: order,
+          },
+        },
+      })
+      .execPopulate();
+    if (path === "nTasks") {
+      res.send({
+        task_count: req.user.nTasks,
+      });
+    } else {
+      res.send(req.user.tasks);
+    }
   } catch (err) {
     res.status(500).send({
       error: err,

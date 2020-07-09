@@ -7,7 +7,6 @@ const helmet = require("helmet");
 
 require("./db/config");
 
-const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const tasksRouter = require("./routes/tasks");
 
@@ -21,7 +20,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 // Routes
-app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/tasks", tasksRouter);
 
