@@ -7,8 +7,8 @@ const helmet = require("helmet");
 
 require("./db/config");
 
-const usersRouter = require("./routes/users");
-const tasksRouter = require("./routes/tasks");
+const usersRouter = require("./routes/user");
+const tasksRouter = require("./routes/task");
 
 const app = express();
 
@@ -20,8 +20,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 // Routes
-app.use("/users", usersRouter);
-app.use("/tasks", tasksRouter);
+app.use("/user", usersRouter);
+app.use("/task", tasksRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

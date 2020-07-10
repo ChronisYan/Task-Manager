@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Task = require("../models/tasks");
+const Task = require("../models/task");
 const validUpdate = require("../middleware/validUpdate");
 const auth = require("../middleware/auth");
 
@@ -27,6 +27,7 @@ router.post("/", [auth, validUpdate(validUpdateFields)], async (req, res) => {
 
 // GET all user's tasks
 router.get("/", auth, async (req, res, next) => {
+  //query defaults
   const match = {};
   let path = "tasks";
   let order = 1;

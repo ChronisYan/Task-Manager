@@ -1,6 +1,7 @@
 const express = require("express");
+const multer = require("multer");
 const router = express.Router();
-const User = require("../models/users");
+const User = require("../models/user");
 const validUpdate = require("../middleware/validUpdate");
 const auth = require("../middleware/auth");
 
@@ -112,6 +113,14 @@ router.post("/logoutAll", auth, async (req, res) => {
       error: err,
     });
   }
+});
+
+// POST upload profile picture
+const upload = multer({ dest: "uploads/avatar/" });
+router.post("/me/avatar", upload.single("avatar"), (req, res) => {
+  res.send({
+    msg: "File was uploaded",
+  });
 });
 
 module.exports = router;
