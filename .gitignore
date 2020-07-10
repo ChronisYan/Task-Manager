@@ -119,3 +119,6 @@ sample_data/
 
 # test upload avatar folder 
 uploads/
+
+# vscode 
+.vscode/
