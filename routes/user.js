@@ -1,5 +1,7 @@
 const express = require("express");
 const multer = require("multer");
+const multers3 = require("multer-s3");
+const s3 = require("../db/S3.config");
 const router = express.Router();
 const User = require("../models/user");
 const validUpdate = require("../middleware/validUpdate");
@@ -116,11 +118,43 @@ router.post("/logoutAll", auth, async (req, res) => {
 });
 
 // POST upload profile picture
-const upload = multer({ dest: "uploads/avatar/" });
-router.post("/me/avatar", upload.single("avatar"), (req, res) => {
-  res.send({
-    msg: "File was uploaded",
-  });
+const upload = multer({
+  dest: "uploads/avatar/",
+  storage: multers3({
+    s3,
+    acl: "public-read",
+    bucket: "bbcodetaskmanagerapi",
+    metadata(req, file, cb) {
+      cb(null, { filedName: file.fieldname });
+    },
+    key(req, file, cb) {
+      cb(null, Date.now().toString() + file.originalname);
+    },
+  }),
+  limits: {
+    fileSize: 1048576, // max size 1MB
+  },
+  fileFilter(req, file, cb) {
+    // allow only jpg, jped, or png
+    if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+      return cb(new Error("Upload an image of types: jpg, jpeg, or png"));
+    }
+    cb(null, true);
+  },
 });
+router.post(
+  "/me/avatar",
+  [auth, upload.single("avatar")],
+  (req, res) => {
+    res.send({
+      msg: "File was uploaded",
+    });
+  },
+  (error, req, res, next) => {
+    res.status(400).send({
+      error: error.message,
+    });
+  }
+);
 
 module.exports = router;
