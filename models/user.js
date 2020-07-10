@@ -3,6 +3,7 @@ const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Task = require("./task");
+const deleteAvatar = require("../utils/deleteS3");
 require("dotenv").config();
 
 const Schema = mongoose.Schema;
@@ -52,6 +53,14 @@ const userSchema = new Schema(
       required: true,
       minlength: 7,
     },
+    avatarKey: {
+      type: String,
+    },
+    avatarUrl: {
+      type: String,
+      default:
+        "https://bbcodetaskmanagerapi.s3.eu-central-1.amazonaws.com/User.png",
+    },
     tokens: [
       {
         token: {
@@ -86,6 +95,7 @@ userSchema.methods.toJSON = function () {
 
   delete userObj.password;
   delete userObj.tokens;
+  delete userObj.avatarKey;
 
   return userObj;
 };
@@ -141,6 +151,9 @@ userSchema.pre("save", async function (next) {
 userSchema.pre("remove", async function (next) {
   const user = this;
   await Task.deleteMany({ owner: user._id });
+  if (user.avatarKey) {
+    await deleteAvatar(user.avatarKey);
+  }
   next();
 });
 

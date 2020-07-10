@@ -6,6 +6,7 @@ const router = express.Router();
 const User = require("../models/user");
 const validUpdate = require("../middleware/validUpdate");
 const auth = require("../middleware/auth");
+const deleteAvatar = require("../utils/deleteS3");
 
 // Fields allowed to be modified
 const validUpdateFields = [
@@ -117,9 +118,8 @@ router.post("/logoutAll", auth, async (req, res) => {
   }
 });
 
-// POST upload profile picture
+// Mutler and AWS S3 config for avatar uploading
 const upload = multer({
-  dest: "uploads/avatar/",
   storage: multers3({
     s3,
     acl: "public-read",
@@ -128,7 +128,7 @@ const upload = multer({
       cb(null, { filedName: file.fieldname });
     },
     key(req, file, cb) {
-      cb(null, Date.now().toString() + file.originalname);
+      cb(null, Date.now().toString() + req.user.username + file.originalname);
     },
   }),
   limits: {
@@ -142,10 +142,18 @@ const upload = multer({
     cb(null, true);
   },
 });
+// POST upload and update profile picture
 router.post(
   "/me/avatar",
   [auth, upload.single("avatar")],
-  (req, res) => {
+  async (req, res) => {
+    // console.log(req.file);
+    if (req.user.avatarKey) {
+      await deleteAvatar(req.user.avatarKey);
+    }
+    req.user.avatarKey = req.file.key;
+    req.user.avatarUrl = req.file.location;
+    await req.user.save();
     res.send({
       msg: "File was uploaded",
     });
@@ -156,5 +164,25 @@ router.post(
     });
   }
 );
+
+// DELETE avatar
+router.delete("/me/avatar", auth, async (req, res) => {
+  try {
+    if (req.user.avatarKey) {
+      await deleteAvatar(req.user.avatarKey);
+    }
+    req.user.avatarKey = "";
+    req.user.avatarUrl =
+      "https://bbcodetaskmanagerapi.s3.eu-central-1.amazonaws.com/User.png";
+    await req.user.save();
+    res.send({
+      msg: "Avatar was deleted",
+    });
+  } catch (err) {
+    res.status(500).send({
+      error: err,
+    });
+  }
+});
 
 module.exports = router;
