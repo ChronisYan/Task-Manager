@@ -7,18 +7,10 @@ const User = require("../models/user");
 const validUpdate = require("../middleware/validUpdate");
 const auth = require("../middleware/auth");
 const deleteAvatar = require("../utils/deleteS3");
-
-// Fields allowed to be modified
-const validUpdateFields = [
-  "first_name",
-  "last_name",
-  "username",
-  "email",
-  "password",
-];
+const constants = require("../utils/constants");
 
 // POST create new user
-router.post("/", validUpdate(validUpdateFields), async (req, res) => {
+router.post("/", validUpdate(constants.VALIDUPDATESUSER), async (req, res) => {
   const user = new User(req.body);
 
   try {
@@ -40,7 +32,7 @@ router.get("/me", auth, (req, res) => {
 // PATCH update logged in user
 router.patch(
   "/me",
-  [auth, validUpdate(validUpdateFields)],
+  [auth, validUpdate(constants.VALIDUPDATESUSER)],
   async (req, res) => {
     try {
       // Manually update user and save
@@ -123,7 +115,7 @@ const upload = multer({
   storage: multers3({
     s3,
     acl: "public-read",
-    bucket: "bbcodetaskmanagerapi",
+    bucket: constants.BUCKET,
     metadata(req, file, cb) {
       cb(null, { filedName: file.fieldname });
     },
@@ -172,8 +164,7 @@ router.delete("/me/avatar", auth, async (req, res) => {
       await deleteAvatar(req.user.avatarKey);
     }
     req.user.avatarKey = "";
-    req.user.avatarUrl =
-      "https://bbcodetaskmanagerapi.s3.eu-central-1.amazonaws.com/User.png";
+    req.user.avatarUrl = constants.DEFAULT_AVATAR;
     await req.user.save();
     res.send({
       msg: "Avatar was deleted",

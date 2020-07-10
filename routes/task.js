@@ -3,27 +3,29 @@ const router = express.Router();
 const Task = require("../models/task");
 const validUpdate = require("../middleware/validUpdate");
 const auth = require("../middleware/auth");
-
-// Fields allowed to be modified
-const validUpdateFields = ["description", "completed"];
+const constants = require("../utils/constants");
 
 // POST create new task
-router.post("/", [auth, validUpdate(validUpdateFields)], async (req, res) => {
-  const new_task = new Task({
-    owner: req.user._id,
-    ...req.body,
-  });
-
-  try {
-    await new_task.populate("owner").execPopulate();
-    await new_task.save();
-    res.status(201).send(new_task);
-  } catch (err) {
-    res.status(400).send({
-      error: err,
+router.post(
+  "/",
+  [auth, validUpdate(constants.VALIDUPDATESTASK)],
+  async (req, res) => {
+    const new_task = new Task({
+      owner: req.user._id,
+      ...req.body,
     });
+
+    try {
+      await new_task.populate("owner").execPopulate();
+      await new_task.save();
+      res.status(201).send(new_task);
+    } catch (err) {
+      res.status(400).send({
+        error: err,
+      });
+    }
   }
-});
+);
 
 // GET all user's tasks
 router.get("/", auth, async (req, res, next) => {
@@ -107,7 +109,7 @@ router.get("/:id", auth, async (req, res) => {
 // PATCH update existing task
 router.patch(
   "/:id",
-  [auth, validUpdate(validUpdateFields)],
+  [auth, validUpdate(constants.VALIDUPDATESTASK)],
   async (req, res) => {
     try {
       const task = await Task.findOne({

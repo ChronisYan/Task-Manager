@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Task = require("./task");
 const deleteAvatar = require("../utils/deleteS3");
+const constants = require("../utils/constants");
 require("dotenv").config();
 
 const Schema = mongoose.Schema;
@@ -58,8 +59,7 @@ const userSchema = new Schema(
     },
     avatarUrl: {
       type: String,
-      default:
-        "https://bbcodetaskmanagerapi.s3.eu-central-1.amazonaws.com/User.png",
+      default: constants.DEFAULT_AVATAR,
     },
     tokens: [
       {

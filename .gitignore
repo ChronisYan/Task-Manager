@@ -122,3 +122,6 @@ uploads/
 
 # vscode 
 .vscode/
+
+# global constants 
+utils/constants.js

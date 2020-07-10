@@ -1,9 +1,10 @@
 const s3 = require("../db/S3.config");
+const constants = require("./constants");
 
 module.exports = (Key) => {
   s3.deleteObject(
     {
-      Bucket: "bbcodetaskmanagerapi",
+      Bucket: constants.BUCKET,
       Key,
     },
     function (error, data) {
